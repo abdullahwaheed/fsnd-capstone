@@ -7,6 +7,8 @@ from flask_cors import CORS
 from werkzeug.wrappers import response
 
 from models import setup_db, Question, Category
+from auth import AuthError, requires_auth
+
 
 QUESTIONS_PER_PAGE = 10
 
@@ -71,6 +73,7 @@ def create_app(test_config=None):
     return jsonify(questions)
 
   @app.route('/questions/<int:question_id>', methods=['DELETE'])
+  @requires_auth('delete:question')
   def delete_question(question_id):
     """
       Create an endpoint to DELETE question using a question ID. 
@@ -91,6 +94,7 @@ def create_app(test_config=None):
       abort(422)
 
   @app.route('/questions', methods=['POST'])
+  @requires_auth('post:question')
   def create_question():
     """
       Create an endpoint to POST a new question, which will require the question and answer text, category, and difficulty score.
@@ -172,6 +176,22 @@ def create_app(test_config=None):
     except:
       abort(422)
 
+  #################################################################################
+  # Error Handlers
+  #################################################################################
+  
+  @app.errorhandler(AuthError)
+  def server_error(error):
+    """
+    handler for AuthError
+    """
+    error_payload = error.error
+    return jsonify({
+        "success": False,
+        "error": error_payload.get('code'),
+        "message": "authentication error",
+        "payload": error_payload.get('description')
+    }), error.status_code
 
   @app.errorhandler(404)
   def not_found(error):
