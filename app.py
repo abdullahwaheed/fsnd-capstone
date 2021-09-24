@@ -1,3 +1,4 @@
+import pdb
 import random
 
 from flask import Flask, request, abort, jsonify
@@ -65,7 +66,7 @@ def create_app(test_config=None):
   @app.route('/questions')
   def retrieve_questions():
     """
-      Create an endpoint to handle GET requests for questions, including pagination (every 10 questions). This endpoint should return a list of questions, 
+      Endpoint to handle GET requests for questions, including pagination (every 10 questions). This endpoint return a list of questions, 
       number of total questions, current category, categories.
     """
     questions = get_paginted_all_questions(request)
@@ -74,7 +75,7 @@ def create_app(test_config=None):
 
   @app.route('/questions/<int:question_id>', methods=['DELETE'])
   @requires_auth('delete:question')
-  def delete_question(question_id):
+  def delete_question(payload, question_id):
     """
       Create an endpoint to DELETE question using a question ID. 
     """
@@ -95,7 +96,7 @@ def create_app(test_config=None):
 
   @app.route('/questions', methods=['POST'])
   @requires_auth('post:question')
-  def create_question():
+  def create_question(payload):
     """
       Create an endpoint to POST a new question, which will require the question and answer text, category, and difficulty score.
     """
@@ -145,7 +146,8 @@ def create_app(test_config=None):
     })
 
   @app.route('/quizzes', methods=['POST'])
-  def quiz_question():
+  @requires_auth('play:quiz')
+  def quiz_question(payload):
     """
       Create a POST endpoint to get questions to play the quiz. 
       This endpoint should take category and previous question parameters and return a random questions within the given category, 
@@ -175,6 +177,30 @@ def create_app(test_config=None):
 
     except:
       abort(422)
+  
+  @app.route('/questions/<int:question_id>', methods=['PATCH'])
+  @requires_auth('patch:question')
+  def edit_question(payload, question_id):
+    try:
+      question = Question.query.filter(Question.id == question_id).one_or_none()
+
+      if question is None:
+        return abort(404)
+
+      request_data = request.get_json()
+
+      if request_data.get('difficulty'):
+        question.difficulty = request_data.get('difficulty')
+      if request_data.get('category'):
+        question.category = request_data.get('category')
+
+      question.update()
+    
+      return jsonify({"success": True, "question": question.format()})
+
+    except:
+      abort(422)
+
 
   #################################################################################
   # Error Handlers
@@ -217,6 +243,15 @@ def create_app(test_config=None):
       "message": "bad request"
       }), 400
 
+  @app.errorhandler(401)
+  def not_found(error):
+    return jsonify({
+        "success": False,
+        "error": 401,
+        "message": "unathorized",
+        "payload": str(error)
+    }), 401
+  
   @app.errorhandler(405)
   def not_found(error):
     return jsonify({
