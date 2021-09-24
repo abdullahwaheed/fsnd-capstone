@@ -77,6 +77,8 @@ play:quiz
 play:quiz
 ```
 
+### To generate auth token
+https://abdullah-udacity-fsnd.us.auth0.com/authorize?audience=trivia&response_type=token&client_id=s8xOh49uaAjQLZViNHp2xd4uckVlcSXT&redirect_uri=http://127.0.0.1:5000
 
 ## Endpoints
 
