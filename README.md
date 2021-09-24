@@ -1,4 +1,4 @@
-# Trivia API 
+# Trivia APP
 
 ### Installing Dependencies for the Backend
 
@@ -51,7 +51,30 @@ To run the tests, run
 dropdb trivia_test
 createdb trivia_test
 psql trivia_test < trivia.psql
-python test_flaskr.py
+python test_app.py
+```
+
+## Enviroment
+To set up environmemnt variables, create a file named .env. Here is the template
+```
+DB_NAME=<DB_NAME>
+DB_USER=<DB_USER>
+DB_PASSWORD=<DB_PASSWORD>
+DB_HOST=<DB_HOST>
+```
+
+## Roles and Permissions
+
+### Admin Role
+```
+post:question
+patch:question
+delete:question
+play:quiz
+```
+### User Role
+```
+play:quiz
 ```
 
 
@@ -165,6 +188,30 @@ POST '/questions'
     'searchTerm': 'this is the term the user is looking for'
 }
 - Returns: any array of questions, a number of totalQuestions that met the search term and the current category string 
+{
+    'questions': [
+        {
+            'id': 1,
+            'question': 'This is a question',
+            'answer': 'This is an answer', 
+            'difficulty': 5,
+            'category': 5
+        },
+    ],
+    'totalQuestions': 100,
+    'currentCategory': 'Entertainment'
+}
+```
+
+```js
+PATCH '/questions/${id}'
+- Sends a patch request to update a specific question with given values
+- Request Body: 
+{
+    'difficulty': 3,
+    'category': 1,
+}
+- Returns: any object of question
 {
     'questions': [
         {
