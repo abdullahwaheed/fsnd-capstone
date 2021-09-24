@@ -3,10 +3,12 @@ from sqlalchemy import Column, String, Integer, create_engine
 from flask_sqlalchemy import SQLAlchemy
 import json
 
-from settings import DB_NAME, DB_HOST, DB_USER, DB_PASSWORD
+from settings import DB_NAME, DB_HOST, DB_USER, DB_PASSWORD, DATABASE_URL
 
-
-database_path = 'postgresql://{}:{}@{}/{}'.format(DB_USER, DB_PASSWORD, DB_HOST, DB_NAME)
+if not DATABASE_URL:
+  database_path = 'postgresql://{}:{}@{}/{}'.format(DB_USER, DB_PASSWORD, DB_HOST, DB_NAME)
+else:
+  database_path = DATABASE_URL
 
 db = SQLAlchemy()
 
